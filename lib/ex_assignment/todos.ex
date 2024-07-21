@@ -170,7 +170,7 @@ defmodule ExAssignment.Todos do
   """
   def check(id) do
     {_, _} =
-      from(t in Todo, where: t.id == ^id, update: [set: [done: true]])
+      from(t in Todo, where: t.id == ^id, update: [set: [done: true, is_next: false]])
       |> Repo.update_all([])
 
     :ok
