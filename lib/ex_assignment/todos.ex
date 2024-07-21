@@ -48,7 +48,13 @@ defmodule ExAssignment.Todos do
     list_todos(:open)
     |> case do
       [] -> nil
-      todos -> Enum.take_random(todos, 1) |> List.first()
+      todos ->
+        prioritized_random_id =
+        todos
+        |> Enum.map(&({&1.id, &1.priority}))
+        |> ExAssignment.PriorityGenerator.get_probabilities()
+
+        Enum.find(todos, &(&1.id == prioritized_random_id))
     end
   end
 
