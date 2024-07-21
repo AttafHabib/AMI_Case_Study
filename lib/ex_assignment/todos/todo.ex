@@ -16,5 +16,6 @@ defmodule ExAssignment.Todos.Todo do
     todo
     |> cast(attrs, [:title, :priority, :done, :is_next])
     |> validate_required([:title, :priority, :done])
+    |> validate_number(:priority, greater_than_or_equal_to: 1)
   end
 end
