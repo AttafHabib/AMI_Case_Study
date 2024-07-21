@@ -61,9 +61,6 @@ defmodule ExAssignment.Todos do
   """
   def get_or_update_recommended() do
     case get_by(is_next: true) do
-      %{is_next: true} = todo ->
-        todo
-
       nil ->
         list_todos(:open)
         |> case do
@@ -75,6 +72,9 @@ defmodule ExAssignment.Todos do
             {:ok, todo} = update_todo(todo, %{is_next: true})
             todo
         end
+
+      %{is_next: true} = todo ->
+        todo
     end
   end
 

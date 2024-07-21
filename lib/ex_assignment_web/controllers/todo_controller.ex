@@ -8,7 +8,13 @@ defmodule ExAssignmentWeb.TodoController do
     open_todos = Todos.list_todos(:open)
     done_todos = Todos.list_todos(:done)
     recommended_todo = Todos.get_or_update_recommended()
-    open_todos = if(recommended_todo) do open_todos -- [recommended_todo] else open_todos end
+
+    open_todos =
+      if recommended_todo do
+        Enum.reject(open_todos, &(&1.id == recommended_todo.id))
+      else
+        open_todos
+      end
 
     render(conn, :index,
       open_todos: open_todos,
@@ -25,6 +31,13 @@ defmodule ExAssignmentWeb.TodoController do
   def create(conn, %{"todo" => todo_params}) do
     case Todos.create_todo(todo_params) do
       {:ok, _} ->
+        todo = Todos.get_by(is_next: true)
+
+        if todo do
+          # As we need to calculate recommended todo again
+          {:ok, _todo} = Todos.update_todo(todo, %{is_next: false})
+        end
+
         conn
         |> put_flash(:info, "Todo created successfully.")
         |> redirect(to: ~p"/todos")
@@ -62,6 +75,12 @@ defmodule ExAssignmentWeb.TodoController do
   def delete(conn, %{"id" => id}) do
     todo = Todos.get_todo!(id)
     {:ok, _todo} = Todos.delete_todo(todo)
+    todo = Todos.get_by(is_next: true)
+
+    if todo do
+      # As we need to calculate recommended todo again
+      {:ok, _todo} = Todos.update_todo(todo, %{is_next: false})
+    end
 
     conn
     |> put_flash(:info, "Todo deleted successfully.")
